@@ -6,14 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpSession;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
+import roomescape.global.exception.business.impl.NotFoundException;
 import roomescape.service.auth.AuthService;
 import roomescape.service.member.MemberService;
 import roomescape.test_util.ServiceTest;
 
-import javax.naming.AuthenticationException;
-import java.util.NoSuchElementException;
-
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class AuthServiceTest extends ServiceTest {
 
@@ -24,7 +23,7 @@ class AuthServiceTest extends ServiceTest {
 
     @Test
     @DisplayName("사용자의 이메일, 비밀번호를 확인한 후 사용자의 아이디를 반환한다.")
-    void loginTest() throws AuthenticationException {
+    void loginTest() {
         // given
         memberService.register(new MemberRegisterRequest("test@test.com", "testPassword", "test"));
         final LoginRequest loginRequest = new LoginRequest("test@test.com", "testPassword");
@@ -46,7 +45,7 @@ class AuthServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> authService.login(loginRequest, new MockHttpSession()))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Test
@@ -58,6 +57,6 @@ class AuthServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> authService.login(loginRequest, new MockHttpSession()))
-                .isInstanceOf(AuthenticationException.class);
+                .isInstanceOf(roomescape.global.exception.security.impl.AuthenticationException.class);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClientException;
 import org.wiremock.spring.EnableWireMock;
 import org.wiremock.spring.InjectWireMock;
 import roomescape.dto.response.TossPaymentResponse;
+import roomescape.global.exception.business.ExternalApiException;
 import roomescape.service.payment.PaymentApproveClient;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
@@ -66,7 +67,7 @@ class PaymentApproveClientTest {
                 "a4CWyWY5m89PNh7xJwhk1",
                 1000
         ))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(ExternalApiException.class)
                 .hasMessageContaining("존재하지 않는 결제 입니다.");
     }
 
@@ -89,7 +90,7 @@ class PaymentApproveClientTest {
                 "a4CWyWY5m89PNh7xJwhk1",
                 1000
         ))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(ExternalApiException.class)
                 .hasMessageContaining("결제 승인 중 예외가 발생하였습니다.");
     }
 

@@ -16,15 +16,17 @@ import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.global.exception.business.impl.InvalidCreateArgumentException;
+import roomescape.global.exception.business.impl.NotFoundException;
 import roomescape.service.reservation.ReservationService;
 import roomescape.test_util.ServiceTest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 class ReservationServiceTest extends ServiceTest {
@@ -83,9 +85,9 @@ class ReservationServiceTest extends ServiceTest {
         // when, then
         assertAll(
                 () -> assertThatThrownBy(() -> reservationService.save(request1))
-                        .isInstanceOf(NoSuchElementException.class),
+                        .isInstanceOf(NotFoundException.class),
                 () -> assertThatThrownBy(() -> reservationService.save(request2))
-                        .isInstanceOf(NoSuchElementException.class)
+                        .isInstanceOf(NotFoundException.class)
         );
     }
 
@@ -107,7 +109,7 @@ class ReservationServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(InvalidCreateArgumentException.class);
     }
 
     @Nested
@@ -437,7 +439,7 @@ class ReservationServiceTest extends ServiceTest {
                 () -> assertThat(remainingReservations).noneMatch(reservation -> reservation.getId() == acceptedReservation.id()),
                 () -> assertThat(remainingReservations).anyMatch(reservation ->
                         reservation.getId() == pendingReservation.id() &&
-                        reservation.getReservationStatus() == ReservationStatus.NOT_PAID
+                                reservation.getReservationStatus() == ReservationStatus.NOT_PAID
                 )
         );
     }
@@ -461,7 +463,7 @@ class ReservationServiceTest extends ServiceTest {
         // then
         assertThat(myReservations).anyMatch(reservation ->
                 reservation.reservationId().equals(acceptedReservation.getId()) &&
-                reservation.priority() == 0
+                        reservation.priority() == 0
         );
     }
 
@@ -485,7 +487,7 @@ class ReservationServiceTest extends ServiceTest {
         // then
         assertThat(myReservations).anyMatch(reservation ->
                 reservation.reservationId().equals(pendingReservation.getId()) &&
-                reservation.priority() == 2
+                        reservation.priority() == 2
         );
     }
 
@@ -505,7 +507,7 @@ class ReservationServiceTest extends ServiceTest {
         List<MyPageReservationResponse> beforeMyReservation = reservationService.getAllBy(member2.getId());
         assertThat(beforeMyReservation).anyMatch(reservation ->
                 reservation.reservationId().equals(pendingReservation.getId()) &&
-                reservation.priority() == 1
+                        reservation.priority() == 1
         );
 
         // when
@@ -515,7 +517,7 @@ class ReservationServiceTest extends ServiceTest {
         List<MyPageReservationResponse> afterMyReservation = reservationService.getAllBy(member2.getId());
         assertThat(afterMyReservation).anyMatch(reservation ->
                 reservation.reservationId().equals(pendingReservation.getId()) &&
-                reservation.priority() == 0
+                        reservation.priority() == 0
         );
     }
 
@@ -531,6 +533,6 @@ class ReservationServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> reservationService.save(new CreateReservationRequest(member.getId(), DATE1, theme.getId(), time.getId())))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(InvalidCreateArgumentException.class);
     }
 }

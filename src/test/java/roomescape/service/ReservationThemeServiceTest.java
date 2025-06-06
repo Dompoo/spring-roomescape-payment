@@ -11,13 +11,14 @@ import roomescape.domain.reservationitem.ReservationTheme;
 import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
+import roomescape.global.exception.business.impl.NotFoundException;
+import roomescape.global.exception.business.impl.RelatedEntityExistException;
 import roomescape.service.reservation.ReservationThemeService;
 import roomescape.test_util.ServiceTest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -76,7 +77,7 @@ class ReservationThemeServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> reservationThemeService.remove(id))
-                .isInstanceOf(NoSuchElementException.class);
+                .isInstanceOf(NotFoundException.class);
 
     }
 
@@ -103,6 +104,6 @@ class ReservationThemeServiceTest extends ServiceTest {
 
         // when, then
         assertThatThrownBy(() -> reservationThemeService.remove(theme.getId()))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(RelatedEntityExistException.class);
     }
 }
