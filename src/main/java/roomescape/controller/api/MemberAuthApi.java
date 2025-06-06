@@ -19,7 +19,7 @@ import roomescape.global.exception.ErrorResponse;
 
 import javax.naming.AuthenticationException;
 
-@Tag(name = "1. 보안 관련 API")
+@Tag(name = "1. 보안")
 public interface MemberAuthApi {
 
     @Operation(summary = "회원가입")

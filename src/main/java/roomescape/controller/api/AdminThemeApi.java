@@ -13,7 +13,7 @@ import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.global.exception.ErrorResponse;
 
-@Tag(name = "3. 테마 관련 API")
+@Tag(name = "3. 테마")
 public interface AdminThemeApi {
 
     @Operation(summary = "테마 추가")

@@ -14,7 +14,7 @@ import roomescape.global.exception.ErrorResponse;
 import java.time.LocalDate;
 import java.util.List;
 
-@Tag(name = "4. 예약 시간 관련 API")
+@Tag(name = "4. 예약 시간")
 public interface MemberTimeApi {
 
     @Operation(summary = "테마, 날짜의 예약 가능 시간 조회")

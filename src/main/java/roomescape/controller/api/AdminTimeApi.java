@@ -15,7 +15,7 @@ import roomescape.global.exception.ErrorResponse;
 
 import java.util.List;
 
-@Tag(name = "4. 예약 시간 관련 API")
+@Tag(name = "4. 예약 시간")
 public interface AdminTimeApi {
 
     @Operation(summary = "예약 시간 추가")
