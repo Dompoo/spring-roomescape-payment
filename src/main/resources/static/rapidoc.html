@@ -7,13 +7,20 @@
     <title>API Docs</title>
     <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
     <style>
-        .switch-bar {
+        .switch-bar-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 999;
             background-color: #f5f5f5;
             padding: 10px 20px;
             display: flex;
             justify-content: flex-end;
             gap: 12px;
             border-bottom: 1px solid #ccc;
+            height: 50px;
+            box-sizing: border-box;
         }
 
         .switch-btn {
@@ -33,6 +40,7 @@
             color: #ff6600;
         }
     </style>
+
 </head>
 <body>
 <rapi-doc
@@ -51,7 +59,7 @@
         sort-endpoints-by="method"
         sort-tags="true"
 >
-    <div class="switch-bar">
+    <div class="switch-bar-fixed">
         <a href="/rapidoc.html" class="switch-btn active">유저 API</a>
         <a href="/rapidoc-admin.html" class="switch-btn">어드민 API</a>
     </div>
