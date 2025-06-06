@@ -6,8 +6,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.global.auth.AuthInterceptor;
-import roomescape.global.auth.LoginMemberArgumentResolver;
+import roomescape.global.auth.argument_resolver.LoginInfoArgumentResolver;
+import roomescape.global.auth.interceptor.LoginInterceptor;
+import roomescape.global.auth.interceptor.RoleInterceptor;
 import roomescape.global.logging.RequestLoggingInterceptor;
 
 import java.util.List;
@@ -16,13 +17,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final AuthInterceptor authInterceptor;
+    private final RoleInterceptor roleInterceptor;
+    private final LoginInterceptor loginInterceptor;
     private final RequestLoggingInterceptor requestLoggingInterceptor;
-    private final LoginMemberArgumentResolver loginMemberArgumentResolver;
+    private final LoginInfoArgumentResolver loginInfoArgumentResolver;
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(loginMemberArgumentResolver);
+        resolvers.add(loginInfoArgumentResolver);
     }
 
     @Override
@@ -41,7 +43,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authInterceptor).addPathPatterns("/api/admin/**");
+        registry.addInterceptor(loginInterceptor).addPathPatterns("/**");
+        registry.addInterceptor(roleInterceptor).addPathPatterns("/**");
         registry.addInterceptor(requestLoggingInterceptor).addPathPatterns("/**").excludePathPatterns("/favicon.ico");
     }
 }

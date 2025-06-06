@@ -1,4 +1,4 @@
-package roomescape.global.auth;
+package roomescape.global.auth.argument_resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -9,12 +9,13 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.global.auth.LoginInfo;
 import roomescape.global.exception.security.impl.AuthorizationException;
 
 import static roomescape.global.exception.security.SecurityErrorCode.SESSION_NOT_EXIST;
 
 @Component
-public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
+public class LoginInfoArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
         return parameter.getParameterType().equals(LoginInfo.class);

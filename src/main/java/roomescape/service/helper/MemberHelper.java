@@ -26,4 +26,9 @@ public class MemberHelper {
         return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException(MEMBER_NOT_EXIST));
     }
+
+    @Transactional(readOnly = true)
+    public boolean isExist(long memberId) {
+        return memberRepository.existById(memberId);
+    }
 }

@@ -5,15 +5,17 @@ import java.util.Optional;
 
 public interface MemberRepository {
 
-    boolean existByEmail(final String email);
-
-    boolean existByName(final String name);
-
     Member save(final Member member);
+
+    List<Member> findAll();
 
     Optional<Member> findByEmail(final String email);
 
     Optional<Member> findById(final long id);
 
-    List<Member> findAll();
+    boolean existById(long memberId);
+
+    boolean existByEmail(final String email);
+
+    boolean existByName(final String name);
 }
