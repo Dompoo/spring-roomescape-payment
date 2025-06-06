@@ -13,7 +13,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
         ),
         servers = {
                 @Server(url = "http://localhost:8080", description = "로컬 개발 서버"),
-                @Server(url = "https://13.209.85.78:8080", description = "개발 환경 서버"),
+                @Server(url = "http://3.34.186.106:8080", description = "개발 환경 서버"),
         }
 )
 @SpringBootApplication
