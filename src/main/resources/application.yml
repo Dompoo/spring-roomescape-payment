@@ -26,7 +26,3 @@ toss:
 http-client:
   connect-timeout-millis: 5000
   read-timeout-millis: 5000
-springdoc:
-  swagger-ui:
-    path: /api-docs.html
-    tags-sorter: alpha

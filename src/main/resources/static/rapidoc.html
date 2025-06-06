@@ -1,0 +1,58 @@
+<!--redoc을 활용한 API 문서-->
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>My API Docs (RapiDoc)</title>
+    <script type="module" src="https://unpkg.com/rapidoc/dist/rapidoc-min.js"></script>
+    <style>
+        .switch-bar {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .switch-btn {
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .switch-btn.active {
+            font-weight: bold;
+            border-color: #ff6600;
+            color: #ff6600;
+        }
+    </style>
+</head>
+<body>
+<rapi-doc
+        spec-url="http://localhost:8080/v3/api-docs/user"
+        theme="light"
+        render-style="read"
+        show-header="true"
+        show-info="true"
+        show-components="true"
+        allow-spec-url-load="false"
+        allow-spec-file-load="false"
+        allow-spec-url-download="true"
+        allow-try="true"
+        update-route="false"
+        default-schema-tab="example"
+>
+    <div class="switch-bar">
+        <a href="/rapidoc.html" class="switch-btn active">유저 API</a>
+        <a href="/rapidoc-admin.html" class="switch-btn">어드민 API</a>
+    </div>
+</rapi-doc>
+</body>
+</html>
