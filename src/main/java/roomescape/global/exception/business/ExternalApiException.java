@@ -8,4 +8,8 @@ public class ExternalApiException extends RuntimeException {
         super(message);
         this.errorCode = errorCode;
     }
+
+    public String codeName() {
+        return errorCode;
+    }
 }

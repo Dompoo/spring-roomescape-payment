@@ -1,6 +1,6 @@
 package roomescape.global.exception.security;
 
-public class RootSecurityException extends RuntimeException {
+public abstract class RootSecurityException extends RuntimeException {
 
     private final SecurityErrorCode code;
 

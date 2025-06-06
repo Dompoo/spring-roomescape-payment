@@ -14,7 +14,11 @@ public abstract class RootBusinessException extends RuntimeException {
         this.code = code;
     }
 
-    public BusinessErrorCode code() {
-        return code;
+    public String codeName() {
+        return code.name();
+    }
+
+    public String message() {
+        return code.message();
     }
 }
