@@ -6,9 +6,9 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.global.AuthInterceptor;
-import roomescape.global.LoginMemberArgumentResolver;
-import roomescape.global.RequestLoggingInterceptor;
+import roomescape.global.auth.AuthInterceptor;
+import roomescape.global.auth.LoginMemberArgumentResolver;
+import roomescape.global.logging.RequestLoggingInterceptor;
 
 import java.util.List;
 

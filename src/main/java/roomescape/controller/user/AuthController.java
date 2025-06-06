@@ -12,7 +12,7 @@ import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.LoginResponse;
 import roomescape.dto.response.MemberRegisterResponse;
-import roomescape.global.LoginInfo;
+import roomescape.global.auth.LoginInfo;
 import roomescape.service.auth.AuthService;
 import roomescape.service.helper.MemberHelper;
 import roomescape.service.member.MemberService;

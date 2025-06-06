@@ -1,4 +1,4 @@
-package roomescape.global;
+package roomescape.global.auth;
 
 public record LoginInfo(
         long memberId

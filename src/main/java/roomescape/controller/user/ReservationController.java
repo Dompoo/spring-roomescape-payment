@@ -11,7 +11,7 @@ import roomescape.dto.request.ReservationPendingRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.global.LoginInfo;
+import roomescape.global.auth.LoginInfo;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservingService;
 
