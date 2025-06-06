@@ -9,8 +9,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.global.exception.security.impl.AuthorizationException;
 
-import javax.naming.AuthenticationException;
+import static roomescape.global.exception.security.SecurityErrorCode.SESSION_NOT_EXIST;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
@@ -20,12 +21,12 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     }
 
     @Override
-    public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer, final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) throws AuthenticationException {
+    public Object resolveArgument(final MethodParameter parameter, final ModelAndViewContainer mavContainer, final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) {
         final HttpServletRequest request = ((ServletWebRequest) webRequest).getRequest();
         final HttpSession session = request.getSession();
         Object memberId = session.getAttribute("id");
         if (memberId == null) {
-            throw new AuthenticationException("[ERROR] 로그인 정보가 존재하지 않습니다.");
+            throw new AuthorizationException(SESSION_NOT_EXIST);
         }
         return LoginInfo.fromObject(memberId);
     }

@@ -5,8 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentRepository;
+import roomescape.global.exception.business.impl.NotFoundException;
 
-import java.util.NoSuchElementException;
+import static roomescape.global.exception.business.BusinessErrorCode.PAYMENT_NOT_EXIST;
 
 @RequiredArgsConstructor
 @Service
@@ -17,7 +18,7 @@ public class PaymentHelper {
     @Transactional(readOnly = true)
     public Payment getByReservationId(Long reservationId) {
         return paymentRepository.findByReservationId(reservationId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 결제 정보입니다."));
+                .orElseThrow(() -> new NotFoundException(PAYMENT_NOT_EXIST));
     }
 
     @Transactional

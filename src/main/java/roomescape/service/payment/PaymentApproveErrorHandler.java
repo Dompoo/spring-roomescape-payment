@@ -6,6 +6,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.ResponseErrorHandler;
+import roomescape.global.exception.business.ExternalApiException;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -34,10 +35,10 @@ public class PaymentApproveErrorHandler implements ResponseErrorHandler {
         JsonNode jsonNode = objectMapper.readTree(new ByteArrayInputStream(bodyBytes));
         final String code = extractMessage(jsonNode, "code");
         if (isSensitiveError(code)) {
-            throw new IllegalStateException("[ERROR] 결제 승인 중 예외가 발생하였습니다.");
+            throw new ExternalApiException("결제 승인 중 예외가 발생하였습니다.", code);
         }
         final String errMessage = extractMessage(jsonNode, "message");
-        throw new IllegalStateException("[ERROR] " + errMessage);
+        throw new ExternalApiException(errMessage, code);
     }
 
     private boolean isSensitiveError(String code) {

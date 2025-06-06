@@ -6,9 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.dto.request.LoginRequest;
+import roomescape.global.exception.security.impl.AuthenticationException;
 import roomescape.service.helper.MemberHelper;
 
-import javax.naming.AuthenticationException;
+import static roomescape.global.exception.security.SecurityErrorCode.INVALID_PASSWORD;
 
 @RequiredArgsConstructor
 @Service
@@ -20,11 +21,11 @@ public class AuthService {
     private final MemberHelper memberHelper;
 
     @Transactional
-    public void login(final LoginRequest loginRequest, final HttpSession session) throws AuthenticationException {
+    public void login(final LoginRequest loginRequest, final HttpSession session) {
         final Member member = memberHelper.getMemberByEmail(loginRequest.email());
 
         if (!member.getPassword().matches(loginRequest.password())) {
-            throw new AuthenticationException("[ERROR] 비밀번호가 일치하지 않습니다.");
+            throw new AuthenticationException(INVALID_PASSWORD);
         }
 
         session.setAttribute(SESSION_KEY, member.getId());

@@ -13,14 +13,19 @@ import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.PendingReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.global.exception.business.impl.InvalidCreateArgumentException;
+import roomescape.global.exception.business.impl.InvalidStatusException;
+import roomescape.global.exception.business.impl.NotFoundException;
+import roomescape.global.exception.security.impl.AuthorizationException;
 import roomescape.service.helper.MemberHelper;
 import roomescape.service.helper.PaymentHelper;
 import roomescape.service.helper.ReservationItemHelper;
 
-import javax.naming.AuthenticationException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NoSuchElementException;
+
+import static roomescape.global.exception.business.BusinessErrorCode.*;
+import static roomescape.global.exception.security.SecurityErrorCode.AUTHORITY_LACK;
 
 @RequiredArgsConstructor
 @Service
@@ -68,16 +73,16 @@ public class ReservationService {
     ) {
         final boolean reservationExists = itemHelper.isExistReservationItem(date, timeId, themeId);
         if (requiresExistingReservation && !reservationExists) {
-            throw new IllegalArgumentException("[ERROR] 대기 예약은 기존 예약이 있을 때만 가능합니다.");
+            throw new InvalidCreateArgumentException(WAITING_WITHOUT_RESERVATION);
         }
         if (!requiresExistingReservation && reservationExists) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약된 시간입니다.");
+            throw new InvalidCreateArgumentException(RESERVATION_ALREADY_EXIST);
         }
     }
 
     private void validateDuplicateReservation(final Member member, final ReservationItem reservationItem) {
         if (reservationRepository.existsByMemberAndReservationItem(member, reservationItem)) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약을 등록하였습니다.");
+            throw new InvalidCreateArgumentException(MEMBER_ALREADY_RESERVED);
         }
     }
 
@@ -125,10 +130,10 @@ public class ReservationService {
     @Transactional
     public void denyPending(Long reservationId) {
         Reservation pendingReservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
 
         if (pendingReservation.getReservationStatus() != ReservationStatus.PENDING) {
-            throw new IllegalArgumentException("[ERROR] 대기 상태의 예약만 거절할 수 있습니다.");
+            throw new InvalidStatusException(DENY_NOT_PENDING);
         }
 
         pendingReservation.denyAndChangeNextReservationToNotPaid();
@@ -137,7 +142,7 @@ public class ReservationService {
     @Transactional
     public void remove(Long reservationId) {
         Reservation targetReservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
 
         targetReservation.denyAndChangeNextReservationToNotPaid();
         paymentHelper.deleteByReservationIdIfExist(reservationId);
@@ -145,13 +150,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void remove(Long reservationId, Long memberId) throws AuthenticationException {
+    public void remove(Long reservationId, Long memberId) {
         Reservation targetReservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
         Member member = memberHelper.getById(memberId);
 
         if (!targetReservation.isCreatedBy(member)) {
-            throw new AuthenticationException("[ERROR] 해당 예약을 제거할 권한이 없습니다.]");
+            throw new AuthorizationException(AUTHORITY_LACK);
         }
 
         targetReservation.denyAndChangeNextReservationToNotPaid();

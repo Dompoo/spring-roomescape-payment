@@ -9,8 +9,12 @@ import roomescape.domain.member.MemberRole;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
+import roomescape.global.exception.business.impl.InvalidCreateArgumentException;
 
 import java.util.List;
+
+import static roomescape.global.exception.business.BusinessErrorCode.EMAIL_DUPLICATED;
+import static roomescape.global.exception.business.BusinessErrorCode.NAME_DUPLICATED;
 
 @RequiredArgsConstructor
 @Service
@@ -40,13 +44,13 @@ public class MemberService {
 
     private void validateDuplicateEmail(final String email) {
         if (memberRepository.existByEmail(email)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 이메일 입니다.");
+            throw new InvalidCreateArgumentException(EMAIL_DUPLICATED);
         }
     }
 
     private void validateDuplicateName(final String name) {
         if (memberRepository.existByName(name)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 이름 입니다.");
+            throw new InvalidCreateArgumentException(NAME_DUPLICATED);
         }
     }
 }

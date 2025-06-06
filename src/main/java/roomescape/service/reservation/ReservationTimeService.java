@@ -8,12 +8,16 @@ import roomescape.domain.reservationitem.ReservationTimeRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeWithAvailabilityResponse;
+import roomescape.global.exception.business.impl.InvalidCreateArgumentException;
+import roomescape.global.exception.business.impl.NotFoundException;
+import roomescape.global.exception.business.impl.RelatedEntityExistException;
 import roomescape.service.helper.ReservationItemHelper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
+
+import static roomescape.global.exception.business.BusinessErrorCode.*;
 
 @RequiredArgsConstructor
 @Service
@@ -34,7 +38,7 @@ public class ReservationTimeService {
     private void validateUniqueReservationTime(final ReservationTime reservationTime) {
         final LocalTime startAt = reservationTime.getStartAt();
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약 시간 입니다.");
+            throw new InvalidCreateArgumentException(RESERVATION_TIME_ALREADY_EXIST);
         }
     }
 
@@ -58,10 +62,10 @@ public class ReservationTimeService {
     @Transactional
     public void remove(final long id) {
         if (!reservationTimeRepository.existsById(id)) {
-            throw new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간입니다.");
+            throw new NotFoundException(RESERVATION_TIME_NOT_EXIST);
         }
         if (!reservationTimeRepository.isAvailableToRemove(id)) {
-            throw new IllegalArgumentException("[ERROR] 예약이 존재해 예약 시간을 삭제할 수 없습니다.");
+            throw new RelatedEntityExistException(RESERVED_RESERVATION_TIME);
         }
         reservationItemHelper.deleteAllReservationItemByTimeId(id);
         reservationTimeRepository.deleteById(id);

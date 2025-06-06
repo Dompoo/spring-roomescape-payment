@@ -6,12 +6,15 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.domain.reservation.Reservation;
+import roomescape.global.exception.business.impl.InvalidCreateArgumentException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static roomescape.global.exception.business.BusinessErrorCode.RESERVATION_PAST;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -48,7 +51,7 @@ public class ReservationItem {
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
         if (dateTime.isBefore(now) || dateTime.isEqual(now)) {
-            throw new IllegalArgumentException("[ERROR] 예약시간은 과거일 수 없습니다.");
+            throw new InvalidCreateArgumentException(RESERVATION_PAST);
         }
     }
 

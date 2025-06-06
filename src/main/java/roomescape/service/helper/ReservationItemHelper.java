@@ -4,9 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationitem.*;
+import roomescape.global.exception.business.impl.NotFoundException;
 
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
+
+import static roomescape.global.exception.business.BusinessErrorCode.RESERVATION_TIME_NOT_EXIST;
+import static roomescape.global.exception.business.BusinessErrorCode.THEME_NOT_EXIST;
 
 @RequiredArgsConstructor
 @Service
@@ -24,9 +27,9 @@ public class ReservationItemHelper {
 
     private ReservationItem create(LocalDate date, long timeId, long themeId) {
         final ReservationTime time = reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약 시간입니다."));
+                .orElseThrow(() -> new NotFoundException(RESERVATION_TIME_NOT_EXIST));
         final ReservationTheme theme = reservationThemeRepository.findById(themeId)
-                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 테마입니다."));
+                .orElseThrow(() -> new NotFoundException(THEME_NOT_EXIST));
 
         final ReservationItem item = new ReservationItem(date, time, theme);
         return reservationItemRepository.save(item);
@@ -35,11 +38,6 @@ public class ReservationItemHelper {
     @Transactional(readOnly = true)
     public boolean isExistReservationItem(final LocalDate date, final Long timeId, final Long themeId) {
         return reservationItemRepository.existsByDateAndTimeAndTheme(date, timeId, themeId);
-    }
-
-    @Transactional
-    public void delete(ReservationItem reservationItem) {
-        reservationItemRepository.delete(reservationItem);
     }
 
     @Transactional

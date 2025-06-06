@@ -11,6 +11,7 @@ import roomescape.domain.payment.Payment;
 import roomescape.domain.payment.PaymentRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
+import roomescape.global.exception.business.ExternalApiException;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -73,18 +74,18 @@ public class PaymentService {
             }
             if (cancelSuccess) {
                 log.info("토스 결제 취소 성공");
-                throw new IllegalStateException("[ERROR] 결제 중 문제가 발생하여 결제를 취소했습니다.");
+                throw new ExternalApiException("결제 중 문제가 발생하여 결제를 취소했습니다.", "PAYMENT_CANCELED");
             } else {
                 log.warn("토스 결제 취소 실패, 취소 대기열에 추가 - paymentKey : {}, idempotencyKey : {}", paymentKey, idempotencyKey);
                 // 결제 취소 시도도 실패했다면, 일단 저장해놓고 추후에 취소 (5분 주기)
                 paymentCancelClient.addToCancelSchedule(paymentKey, idempotencyKey);
-                throw new IllegalStateException("[ERROR] 결제 중 문제가 발생했습니다. 시간이 지나도 결제가 취소되지 않는다면 관리자에게 문의하세요.");
+                throw new ExternalApiException("결제 중 문제가 발생했습니다. 시간이 지나도 결제가 취소되지 않는다면 관리자에게 문의하세요.", "PAYMENT_CANCEL_SCHEDULED");
             }
         } catch (Exception e) {
             log.error("토스 결제 승인 시도 중 예상치 못한 예외 발생", e);
             // 예상하지 못한 예외 -> 관리자 문의
             // TODO : 개발자 수준에서 더 처리할 수 있는 것이 있다면 추가하기
-            throw new IllegalStateException("[ERROR] 결제 중 예기치 못한 문제가 발생하였습니다. 관리자에게 문의하세요.");
+            throw new ExternalApiException("결제 중 예기치 못한 문제가 발생하였습니다. 관리자에게 문의하세요.", "PAYMENT_FAILED");
         }
     }
 }
