@@ -1,0 +1,16 @@
+Configuration:
+  status: WARN
+  monitorInterval: 30
+
+  Appenders:
+    Console:
+      name: Console
+      target: SYSTEM_OUT
+      PatternLayout:
+        pattern: "%highlight{[%d{yyyy-MM-dd HH:mm:ss.SSS}]}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=cyan} %highlight{%-5p} %c{1.} - %m%n"
+
+  Loggers:
+    Root:
+      level: info
+      AppenderRef:
+        - ref: Console
