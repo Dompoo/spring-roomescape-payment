@@ -12,6 +12,7 @@ import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.global.auth.LoginInfo;
+import roomescape.global.auth.LoginRequired;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservingService;
 
@@ -27,6 +28,7 @@ public class ReservationController implements MemberReservationApi {
     private final ReservingService reservingService;
 
     @Override
+    @LoginRequired
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> reserve(
             @RequestBody @Valid ReservationRequest request,
@@ -37,6 +39,7 @@ public class ReservationController implements MemberReservationApi {
     }
 
     @Override
+    @LoginRequired
     @PostMapping("/reservations/pending")
     public ResponseEntity<ReservationResponse> addPending(
             @RequestBody @Valid ReservationPendingRequest request,
@@ -48,6 +51,7 @@ public class ReservationController implements MemberReservationApi {
     }
 
     @Override
+    @LoginRequired
     @GetMapping("/reservations")
     public ResponseEntity<List<MyPageReservationResponse>> getMines(LoginInfo loginInfo) {
         List<MyPageReservationResponse> response = reservationService.getAllBy(loginInfo.memberId());
@@ -55,6 +59,7 @@ public class ReservationController implements MemberReservationApi {
     }
 
     @Override
+    @LoginRequired
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> remove(@PathVariable long reservationId, LoginInfo loginInfo) throws AuthenticationException {
         reservationService.remove(reservationId, loginInfo.memberId());

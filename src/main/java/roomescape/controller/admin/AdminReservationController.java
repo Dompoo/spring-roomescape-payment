@@ -9,10 +9,14 @@ import roomescape.controller.api.AdminReservationApi;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.PendingReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.global.auth.LoginRequired;
+import roomescape.global.auth.RoleRequired;
 import roomescape.service.reservation.ReservationService;
 
 import java.time.LocalDate;
 import java.util.List;
+
+import static roomescape.domain.member.MemberRole.ADMIN;
 
 @RequiredArgsConstructor
 @RestController
@@ -22,6 +26,8 @@ public class AdminReservationController implements AdminReservationApi {
     private final ReservationService reservationService;
 
     @Override
+    @LoginRequired
+    @RoleRequired(ADMIN)
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> save(@RequestBody @Valid CreateReservationRequest request) {
         ReservationResponse response = reservationService.save(request);
@@ -29,6 +35,8 @@ public class AdminReservationController implements AdminReservationApi {
     }
 
     @Override
+    @LoginRequired
+    @RoleRequired(ADMIN)
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> getAllByFilter(
             @RequestParam(required = false, name = "memberId") Long memberId,
@@ -41,13 +49,17 @@ public class AdminReservationController implements AdminReservationApi {
     }
 
     @Override
+    @LoginRequired
+    @RoleRequired(ADMIN)
     @GetMapping("/reservations/pending")
     public ResponseEntity<List<PendingReservationResponse>> getAllPendings() {
         List<PendingReservationResponse> response = reservationService.getAllPendings();
         return ResponseEntity.ok(response);
     }
-    
+
     @Override
+    @LoginRequired
+    @RoleRequired(ADMIN)
     @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<Void> remove(@PathVariable long reservationId) {
         reservationService.remove(reservationId);
@@ -55,6 +67,8 @@ public class AdminReservationController implements AdminReservationApi {
     }
 
     @Override
+    @LoginRequired
+    @RoleRequired(ADMIN)
     @DeleteMapping("/reservations/pending/{reservationId}/deny")
     public ResponseEntity<Void> denyPending(@PathVariable long reservationId) {
         reservationService.denyPending(reservationId);

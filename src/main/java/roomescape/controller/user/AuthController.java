@@ -13,6 +13,7 @@ import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.LoginResponse;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.global.auth.LoginInfo;
+import roomescape.global.auth.LoginRequired;
 import roomescape.service.auth.AuthService;
 import roomescape.service.helper.MemberHelper;
 import roomescape.service.member.MemberService;
@@ -43,6 +44,7 @@ public class AuthController implements MemberAuthApi {
     }
 
     @Override
+    @LoginRequired
     @GetMapping("/auth/login/check")
     public ResponseEntity<LoginResponse> loginCheck(LoginInfo loginInfo) {
         Member member = memberHelper.getById(loginInfo.memberId());
@@ -51,6 +53,7 @@ public class AuthController implements MemberAuthApi {
     }
 
     @Override
+    @LoginRequired
     @PostMapping("/auth/logout")
     public ResponseEntity<Void> logout(HttpSession session) {
         authService.logout(session);

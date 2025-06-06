@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.api.MemberTimeApi;
 import roomescape.dto.response.ReservationTimeWithAvailabilityResponse;
+import roomescape.global.auth.LoginRequired;
 import roomescape.service.reservation.ReservationTimeService;
 
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ public class TimeController implements MemberTimeApi {
     private final ReservationTimeService reservationTimeService;
 
     @Override
+    @LoginRequired
     @GetMapping("/times/{themeId}/available")
     public ResponseEntity<List<ReservationTimeWithAvailabilityResponse>> getAvailables(
             @PathVariable long themeId,

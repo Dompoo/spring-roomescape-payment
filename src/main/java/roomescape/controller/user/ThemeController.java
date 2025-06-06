@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.api.MemberThemeApi;
 import roomescape.dto.response.ReservationThemeResponse;
+import roomescape.global.auth.LoginRequired;
 import roomescape.service.reservation.ReservationThemeService;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class ThemeController implements MemberThemeApi {
     private final ReservationThemeService reservationThemeService;
 
     @Override
+    @LoginRequired
     @GetMapping("/themes")
     public ResponseEntity<List<ReservationThemeResponse>> getAll() {
         List<ReservationThemeResponse> response = reservationThemeService.getAll();
