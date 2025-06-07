@@ -14,13 +14,13 @@ public interface MemberThemeApi {
 
     @Operation(summary = "모든 테마 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
+            @ApiResponse(responseCode = "200"),
     })
     ResponseEntity<List<ReservationThemeResponse>> getAll();
 
     @Operation(summary = "인기 테마 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
+            @ApiResponse(responseCode = "200"),
     })
     ResponseEntity<List<ReservationThemeResponse>> getPopulars();
 }

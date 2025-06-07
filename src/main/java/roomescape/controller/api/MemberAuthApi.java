@@ -3,7 +3,7 @@ package roomescape.controller.api;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -15,7 +15,6 @@ import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.LoginResponse;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.global.auth.LoginInfo;
-import roomescape.global.exception.ErrorResponse;
 
 import javax.naming.AuthenticationException;
 
@@ -24,9 +23,17 @@ public interface MemberAuthApi {
 
     @Operation(summary = "회원가입")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
-            @ApiResponse(responseCode = "400", description = "이메일이 중복된 경우", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "400", description = "이름이 중복된 경우", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400", content = @Content(examples = {
+                    @ExampleObject(
+                            name = "이메일이 중복된 경우",
+                            ref = "#/components/examples/EMAIL_DUPLICATED"
+                    ),
+                    @ExampleObject(
+                            name = "이름이 중복된 경우",
+                            ref = "#/components/examples/NAME_DUPLICATED"
+                    ),
+            })),
     })
     ResponseEntity<MemberRegisterResponse> register(
             @RequestBody(required = true) MemberRegisterRequest request
@@ -34,9 +41,19 @@ public interface MemberAuthApi {
 
     @Operation(summary = "로그인")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
-            @ApiResponse(responseCode = "400", description = "비밀번호가 일치하지 않는 경우", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
-            @ApiResponse(responseCode = "404", description = "존재하지 않는 이메일인 경우", content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "200"),
+            @ApiResponse(responseCode = "400", content = @Content(examples = {
+                    @ExampleObject(
+                            name = "비밀번호가 일치하지 않는 경우",
+                            ref = "#/components/examples/INVALID_PASSWORD"
+                    )
+            })),
+            @ApiResponse(responseCode = "404", content = @Content(examples = {
+                    @ExampleObject(
+                            name = "존재하지 않는 이메일인 경우",
+                            ref = "#/components/examples/MEMBER_NOT_EXIST"
+                    )
+            })),
     })
     ResponseEntity<Void> login(
             @RequestBody(required = true) LoginRequest loginRequest,
@@ -45,7 +62,7 @@ public interface MemberAuthApi {
 
     @Operation(summary = "로그인 정보 확인")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
+            @ApiResponse(responseCode = "200"),
     })
     ResponseEntity<LoginResponse> loginCheck(
             @Parameter(hidden = true) LoginInfo loginInfo
@@ -53,7 +70,7 @@ public interface MemberAuthApi {
 
     @Operation(summary = "로그아웃")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
+            @ApiResponse(responseCode = "200"),
     })
     ResponseEntity<Void> logout(
             @Parameter(hidden = true) HttpSession session

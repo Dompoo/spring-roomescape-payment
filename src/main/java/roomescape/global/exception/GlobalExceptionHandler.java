@@ -28,6 +28,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.business(e));
     }
 
+    @ExceptionHandler(ExternalApiException.class)
+    public ResponseEntity<ErrorResponse> handleExternalApiException(final ExternalApiException e) {
+        log.warn("handled ExternalApiException: {}", e.getMessage(), e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.externalApi(e));
+    }
+
     @ExceptionHandler(RootBusinessException.class)
     public ResponseEntity<ErrorResponse> handleRootBusinessException(final RootBusinessException e) {
         log.warn("handled BusinessException: {}", e.getMessage(), e);
@@ -44,12 +50,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleAuthorizationException(final AuthorizationException e) {
         log.warn("handled AuthorizationException: {}", e.detailMessage(), e);
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ErrorResponse.security(e));
-    }
-
-    @ExceptionHandler(ExternalApiException.class)
-    public ResponseEntity<ErrorResponse> handleExternalApiException(final ExternalApiException e) {
-        log.warn("handled ExternalApiException: {}", e.getMessage(), e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.externalApi(e));
     }
 
     @ExceptionHandler(Exception.class)

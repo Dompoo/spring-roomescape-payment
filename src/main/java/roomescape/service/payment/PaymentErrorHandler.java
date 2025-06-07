@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-public class PaymentApproveErrorHandler implements ResponseErrorHandler {
+import static roomescape.global.exception.business.BusinessErrorCode.PAYMENT_APPROVE_FAILED;
+
+public class PaymentErrorHandler implements ResponseErrorHandler {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -35,10 +37,10 @@ public class PaymentApproveErrorHandler implements ResponseErrorHandler {
         JsonNode jsonNode = objectMapper.readTree(new ByteArrayInputStream(bodyBytes));
         final String code = extractMessage(jsonNode, "code");
         if (isSensitiveError(code)) {
-            throw new ExternalApiException("결제 승인 중 예외가 발생하였습니다.", code);
+            throw new ExternalApiException(PAYMENT_APPROVE_FAILED);
         }
         final String errMessage = extractMessage(jsonNode, "message");
-        throw new ExternalApiException(errMessage, code);
+        throw new ExternalApiException(PAYMENT_APPROVE_FAILED, errMessage);
     }
 
     private boolean isSensitiveError(String code) {

@@ -14,7 +14,7 @@ public interface AdminMemberApi {
 
     @Operation(summary = "모든 멤버 조회")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "정상 응답"),
+            @ApiResponse(responseCode = "200"),
     })
     ResponseEntity<List<MemberResponse>> getAll();
 }

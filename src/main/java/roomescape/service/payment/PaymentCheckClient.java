@@ -25,7 +25,7 @@ public class PaymentCheckClient {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
                 .requestFactory(requestFactory)
-                .defaultStatusHandler(new PaymentApproveErrorHandler())
+                .defaultStatusHandler(new PaymentErrorHandler())
                 .build();
         this.widgetSecretKey = widgetSecretKey;
         this.paymentCheckUrl = paymentCheckUrl;

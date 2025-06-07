@@ -3,9 +3,18 @@ package roomescape.controller.api;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.examples.Example;
+import org.springdoc.core.customizers.OpenApiCustomizer;
 import org.springdoc.core.models.GroupedOpenApi;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import roomescape.global.exception.business.BusinessErrorCode;
+import roomescape.global.exception.security.SecurityErrorCode;
+
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Map;
 
 @OpenAPIDefinition(
         info = @Info(
@@ -26,6 +35,7 @@ public class OpenApiConfig {
                 .group("유저 API")
                 .pathsToMatch("/api/**")
                 .pathsToExclude("/api/admin/**")
+                .addOpenApiCustomizer(exampleInjector())
                 .build();
     }
 
@@ -34,6 +44,34 @@ public class OpenApiConfig {
         return GroupedOpenApi.builder()
                 .group("어드민 API")
                 .pathsToMatch("/api/admin/**")
+                .addOpenApiCustomizer(exampleInjector())
                 .build();
+    }
+
+    @Bean
+    public OpenApiCustomizer exampleInjector() {
+        return openApi -> {
+            Components components = openApi.getComponents();
+
+            Arrays.stream(BusinessErrorCode.values()).forEach(errorCode -> {
+                Example example = new Example()
+                        .value(Map.of(
+                                "errorCode", errorCode.name(),
+                                "message", errorCode.message(),
+                                "timestamp", LocalDateTime.now()
+                        ));
+                components.addExamples(errorCode.name(), example);
+            });
+
+            Arrays.stream(SecurityErrorCode.values()).forEach(errorCode -> {
+                Example example = new Example()
+                        .value(Map.of(
+                                "errorCode", errorCode.name(),
+                                "message", errorCode.clientMessage(),
+                                "timestamp", LocalDateTime.now()
+                        ));
+                components.addExamples(errorCode.name(), example);
+            });
+        };
     }
 }
