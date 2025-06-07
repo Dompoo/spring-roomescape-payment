@@ -1,9 +1,20 @@
 package roomescape.dto.response;
 
-import java.time.LocalTime;
+import io.swagger.v3.oas.annotations.media.Schema;
 import roomescape.domain.reservationitem.ReservationTime;
 
-public record ReservationTimeWithAvailabilityResponse(long id, LocalTime startAt, boolean isBooked) {
+import java.time.LocalTime;
+
+public record ReservationTimeWithAvailabilityResponse(
+        @Schema(example = "1")
+        long id,
+
+        @Schema(example = "15:00")
+        LocalTime startAt,
+        
+        @Schema(example = "true")
+        boolean isBooked
+) {
 
     public static ReservationTimeWithAvailabilityResponse from(ReservationTime time, boolean isBooked) {
         return new ReservationTimeWithAvailabilityResponse(time.getId(), time.getStartAt(), isBooked);

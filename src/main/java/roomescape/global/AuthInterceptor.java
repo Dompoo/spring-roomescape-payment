@@ -3,27 +3,24 @@ package roomescape.global;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
-import roomescape.service.member.MemberService;
+import roomescape.service.helper.MemberHelper;
 
 @Component
+@RequiredArgsConstructor
 public class AuthInterceptor implements HandlerInterceptor {
 
     private static final String SESSION_KEY = "id";
-    private final MemberService memberService;
-
-    public AuthInterceptor(final MemberService memberService) {
-        this.memberService = memberService;
-    }
+    private final MemberHelper memberHelper;
 
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
-
 
         HttpSession session = request.getSession(false);
 
@@ -34,7 +31,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         final Long memberId = (Long) session.getAttribute(SESSION_KEY);
 
-        final Member member = memberService.getMemberById(memberId);
+        final Member member = memberHelper.getById(memberId);
         if (MemberRole.ADMIN != member.getRole()) {
             response.sendError(HttpStatus.UNAUTHORIZED.value(), "[ERROR] 관리자 권한이 필요합니다.");
             return false;

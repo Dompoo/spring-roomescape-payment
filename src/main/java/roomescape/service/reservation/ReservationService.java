@@ -4,18 +4,20 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.payment.Payment;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationitem.ReservationItem;
-import roomescape.domain.reservationitem.ReservationTheme;
-import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
+import roomescape.dto.response.PendingReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.WaitingReservationResponse;
-import roomescape.service.member.MemberService;
+import roomescape.service.helper.MemberHelper;
+import roomescape.service.helper.PaymentHelper;
+import roomescape.service.helper.ReservationItemHelper;
 
+import javax.naming.AuthenticationException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -25,60 +27,49 @@ import java.util.NoSuchElementException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationItemService reservationItemService;
-    private final MemberService memberService;
-    private final ReservationThemeService reservationThemeService;
-    private final ReservationTimeService reservationTimeService;
+    private final MemberHelper memberHelper;
+    private final ReservationItemHelper itemHelper;
+    private final PaymentHelper paymentHelper;
 
     @Transactional
-    public ReservationResponse addReservation(final CreateReservationRequest request) {
+    public ReservationResponse save(final CreateReservationRequest request) {
         return createReservation(request, ReservationStatus.ACCEPTED, false);
     }
 
     @Transactional
-    public ReservationResponse addPendingReservation(final CreateReservationRequest request) {
+    public ReservationResponse pending(final CreateReservationRequest request) {
         return createReservation(request, ReservationStatus.PENDING, true);
     }
 
     private ReservationResponse createReservation(
             final CreateReservationRequest request,
             final ReservationStatus status,
-            final boolean requiresExistingReservation) {
+            final boolean requiresExistingReservation
+    ) {
+        validateReservationAvailability(request.date(), request.timeId(), request.themeId(), requiresExistingReservation);
+        final Member member = memberHelper.getById(request.memberId());
+        final ReservationItem item = itemHelper.getOrCreate(request.date(), request.timeId(), request.themeId());
+        validateDuplicateReservation(member, item);
 
-        final Member member = memberService.getMemberById(request.memberId());
-        final ReservationTime time = reservationTimeService.getReservationTimeById(request.timeId());
-        final ReservationTheme theme = reservationThemeService.getThemeById(request.themeId());
-        final LocalDate date = request.date();
-
-        validateReservationAvailability(date, time, theme, requiresExistingReservation);
-
-        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(
-                date, time, theme);
-
-        validateDuplicateReservation(member, reservationItem);
-
-        final Reservation saved = reservationRepository.save(
-                Reservation.builder()
-                        .member(member)
-                        .reservationItem(reservationItem)
-                        .reservationStatus(status)
-                        .build()
-        );
+        Reservation newReservation = Reservation.builder()
+                .member(member)
+                .reservationItem(item)
+                .reservationStatus(status)
+                .build();
+        final Reservation saved = reservationRepository.save(newReservation);
         return ReservationResponse.from(saved);
     }
 
     private void validateReservationAvailability(
             final LocalDate date,
-            final ReservationTime time,
-            final ReservationTheme theme,
-            final boolean requiresExistingReservation) {
-
-        final boolean reservationExists = reservationItemService.isExistReservationItem(date, time, theme);
-
+            final Long timeId,
+            final Long themeId,
+            final boolean requiresExistingReservation
+    ) {
+        final boolean reservationExists = itemHelper.isExistReservationItem(date, timeId, themeId);
         if (requiresExistingReservation && !reservationExists) {
             throw new IllegalArgumentException("[ERROR] 대기 예약은 기존 예약이 있을 때만 가능합니다.");
         }
-
         if (!requiresExistingReservation && reservationExists) {
             throw new IllegalArgumentException("[ERROR] 이미 예약된 시간입니다.");
         }
@@ -91,17 +82,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationResponse> getAllReservations() {
-        return reservationRepository.findAllReservations().stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public List<ReservationResponse> getFilteredReservations(final Long memberId,
-                                                             final Long themeId,
-                                                             final LocalDate dateFrom,
-                                                             final LocalDate dateTo) {
+    public List<ReservationResponse> getAllFiltered(
+            final Long memberId,
+            final Long themeId,
+            final LocalDate dateFrom,
+            final LocalDate dateTo
+    ) {
         final List<Reservation> reservations = reservationRepository.findByMemberIdAndThemeIdAndDateFromAndDateTo(
                 memberId,
                 themeId,
@@ -114,80 +100,62 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingReservationResponse> getAllWaitingReservations() {
-        List<Reservation> waitingReservations = reservationRepository.findByReservationStatusOrderByIdDesc(ReservationStatus.PENDING);
-        return waitingReservations.stream()
-                .map(WaitingReservationResponse::from)
+    public List<PendingReservationResponse> getAllPendings() {
+        List<Reservation> pendingReservations = reservationRepository.findByReservationStatusOrderByIdDesc(ReservationStatus.PENDING);
+        return pendingReservations.stream()
+                .map(PendingReservationResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<MyPageReservationResponse> getReservationsByMemberId(Long memberId) {
-        final Member member = memberService.getMemberById(memberId);
+    public List<MyPageReservationResponse> getAllBy(Long memberId) {
+        final Member member = memberHelper.getById(memberId);
         List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
         return myReservations.stream()
                 .map(reservation -> {
-                            final int priority = calculatePriority(reservation);
-                            return MyPageReservationResponse.from(reservation, priority);
-                        }
-                )
+                    if (reservation.getReservationStatus() == ReservationStatus.ACCEPTED) {
+                        Payment payment = paymentHelper.getByReservationId(reservation.getId());
+                        return MyPageReservationResponse.from(reservation, payment.getPaymentKey(), payment.getAmount());
+                    }
+                    return MyPageReservationResponse.from(reservation, null, null);
+                })
                 .toList();
     }
 
-    private int calculatePriority(Reservation reservation) {
-        Long reservationItemId = reservation.getReservationItem().getId();
-        Long currentReservationId = reservation.getId();
-
-        return (int) reservationRepository.countByReservationItemIdAndIdLessThan(
-                reservationItemId, currentReservationId
-        );
-    }
-
     @Transactional
-    public void denyPendingReservation(Long reservationId) {
-        Reservation waitingReservation = reservationRepository.findById(reservationId)
+    public void denyPending(Long reservationId) {
+        Reservation pendingReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
 
-        if (waitingReservation.getReservationStatus() != ReservationStatus.PENDING) {
+        if (pendingReservation.getReservationStatus() != ReservationStatus.PENDING) {
             throw new IllegalArgumentException("[ERROR] 대기 상태의 예약만 거절할 수 있습니다.");
         }
 
-        waitingReservation.changeStatusToDenied();
+        pendingReservation.denyAndChangeNextReservationToNotPaid();
     }
 
     @Transactional
-    public void removeReservation(Long reservationId) {
+    public void remove(Long reservationId) {
         Reservation targetReservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
 
-        if (targetReservation.getReservationStatus() == ReservationStatus.PENDING) {
-            deleteReservationOnly(targetReservation);
-        } else if (targetReservation.getReservationStatus() == ReservationStatus.ACCEPTED) {
-            handleAcceptedReservationRemoval(targetReservation);
+        targetReservation.denyAndChangeNextReservationToNotPaid();
+        paymentHelper.deleteByReservationIdIfExist(reservationId);
+        reservationRepository.deleteById(targetReservation.getId());
+    }
+
+    @Transactional
+    public void remove(Long reservationId, Long memberId) throws AuthenticationException {
+        Reservation targetReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+        Member member = memberHelper.getById(memberId);
+
+        if (!targetReservation.isCreatedBy(member)) {
+            throw new AuthenticationException("[ERROR] 해당 예약을 제거할 권한이 없습니다.]");
         }
-    }
 
-    private void handleAcceptedReservationRemoval(Reservation targetReservation) {
-        ReservationItem reservationItem = targetReservation.getReservationItem();
-
-        reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
-                reservationItem, ReservationStatus.PENDING
-        ).ifPresentOrElse(
-                nextReservation -> {
-                    nextReservation.changeStatusToAccepted();
-                    reservationRepository.save(nextReservation);
-                    deleteReservationOnly(targetReservation);
-                },
-                () -> deleteReservationWithItem(targetReservation, reservationItem)
-        );
-    }
-
-    private void deleteReservationOnly(Reservation reservation) {
-        reservationRepository.deleteById(reservation.getId());
-    }
-
-    private void deleteReservationWithItem(Reservation reservation, ReservationItem reservationItem) {
-        reservationRepository.deleteById(reservation.getId());
-        reservationItemService.deleteReservationItem(reservationItem);
+        targetReservation.denyAndChangeNextReservationToNotPaid();
+        paymentHelper.deleteByReservationIdIfExist(reservationId);
+        reservationRepository.deleteById(targetReservation.getId());
     }
 }

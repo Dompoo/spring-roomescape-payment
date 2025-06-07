@@ -1,50 +1,28 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.config.JpaConfig;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservationitem.ReservationItem;
-import roomescape.domain.reservationitem.ReservationItemRepository;
-import roomescape.domain.reservationitem.ReservationTheme;
-import roomescape.domain.reservationitem.ReservationThemeRepository;
-import roomescape.domain.reservationitem.ReservationTime;
-import roomescape.domain.reservationitem.ReservationTimeRepository;
-import roomescape.repository.impl.MemberRepositoryImpl;
-import roomescape.repository.impl.ReservationItemRepositoryImpl;
-import roomescape.repository.impl.ReservationRepositoryImpl;
-import roomescape.repository.impl.ReservationThemeRepositoryImpl;
-import roomescape.repository.impl.ReservationTimeRepositoryImpl;
-import roomescape.repository.jpa.MemberJpaRepository;
-import roomescape.repository.jpa.ReservationItemJpaRepository;
-import roomescape.repository.jpa.ReservationJpaRepository;
-import roomescape.repository.jpa.ReservationThemeJpaRepository;
-import roomescape.repository.jpa.ReservationTimeJpaRepository;
+import roomescape.domain.reservationitem.*;
+import roomescape.repository.impl.*;
+import roomescape.repository.jpa.*;
+import roomescape.test_util.RepositoryTest;
 
-@TestPropertySource(properties = {
-        "spring.sql.init.mode=never",
-        "spring.jpa.hibernate.ddl-auto=create-drop"
-})
-@Import(JpaConfig.class)
-@DataJpaTest
-public class ReservationRepositoryTest {
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
+public class ReservationRepositoryTest extends RepositoryTest {
 
     private ReservationRepository reservationRepository;
 
@@ -76,8 +54,8 @@ public class ReservationRepositoryTest {
     void setUp() {
         reservationRepository = new ReservationRepositoryImpl(reservationJpaRepository);
         memberRepository = new MemberRepositoryImpl(memberJpaRepository);
-        reservationThemeRepository = new ReservationThemeRepositoryImpl(reservationThemeJpaRepository);
-        reservationTimeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository);
+        reservationThemeRepository = new ReservationThemeRepositoryImpl(reservationThemeJpaRepository, reservationJpaRepository);
+        reservationTimeRepository = new ReservationTimeRepositoryImpl(reservationTimeJpaRepository, reservationJpaRepository);
         reservationItemRepository = new ReservationItemRepositoryImpl(reservationItemJpaRepository);
 
         member = memberRepository.save(
@@ -102,37 +80,6 @@ public class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("날짜와 시간 테마가 같은 예약이 있는지 확인한다.")
-    void existsByDateAndTimeIdAndThemeIdTest() {
-        // given
-        Long nonExistTimeId = 999L;
-        Long nonExistThemeId = 999L;
-        LocalDate nonExistDate = LocalDate.now().plusDays(2);
-
-        // when
-        final boolean exist = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), time.getId(), theme.getId()
-        );
-        final boolean nonExist1 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), nonExistTimeId, theme.getId()
-        );
-        final boolean nonExist2 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), time.getId(), nonExistThemeId
-        );
-        final boolean nonExist3 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                nonExistDate, time.getId(), theme.getId()
-        );
-
-        // then
-        assertAll(
-                () -> assertThat(exist).isTrue(),
-                () -> assertThat(nonExist1).isFalse(),
-                () -> assertThat(nonExist2).isFalse(),
-                () -> assertThat(nonExist3).isFalse()
-        );
-    }
-
-    @Test
     @DisplayName("사용자 아이디를 통해 해당 사용자의 예약 내역들을 조회한다")
     void findReservationsByMemberIdTest() {
         // given
@@ -147,37 +94,5 @@ public class ReservationRepositoryTest {
                 () -> assertThat(reservations.getFirst().getReservationItem().getTime().getId()).isEqualTo(time.getId()),
                 () -> assertThat(reservations.getFirst().getReservationItem().getTheme().getId()).isEqualTo(theme.getId())
         );
-    }
-
-    @Test
-    @DisplayName("예약 대기 중 가장 빠른 대기를 조회한다.")
-    void getFirstPendingReservationTest() {
-        // given
-        reservationRepository.save(new Reservation(member3, reservationItem, ReservationStatus.PENDING));
-        reservationRepository.save(new Reservation(member2, reservationItem, ReservationStatus.PENDING));
-
-        // when
-        final Optional<Reservation> reservation = reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
-                reservationItem, ReservationStatus.PENDING
-        );
-
-        // then
-        assertThat(reservation).isPresent();
-        assertAll(
-                () -> assertThat(reservation.get().getReservationStatus()).isEqualTo(ReservationStatus.PENDING),
-                () -> assertThat(reservation.get().getMember()).isEqualTo(member3)
-        );
-    }
-
-    @Test
-    @DisplayName("예약 대기가 없다면 Optional이 비어있다.")
-    void getNoPendingReservationTest() {
-        // when
-        final Optional<Reservation> reservation = reservationRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(
-                reservationItem, ReservationStatus.PENDING
-        );
-
-        // then
-        assertThat(reservation).isEmpty();
     }
 }

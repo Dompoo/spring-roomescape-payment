@@ -2,15 +2,15 @@ package roomescape.service.payment;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import roomescape.dto.response.PaymentSuccessResponse;
+import roomescape.dto.response.TossPaymentResponse;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Map;
 
-@Service
+@Component
 public class PaymentApproveClient {
 
     private final RestClient restClient;
@@ -21,7 +21,7 @@ public class PaymentApproveClient {
             @Value("${toss.payments.base-url}") String baseUrl,
             @Value("${toss.payments.widget-secret-key}") String widgetSecretKey,
             @Value("${toss.payments.payment-approve-url}") String paymentApproveUrl,
-            MyClientHttpRequestFactory requestFactory
+            TimeoutClientHttpRequestFactory requestFactory
     ) {
         this.restClient = RestClient.builder()
                 .baseUrl(baseUrl)
@@ -32,8 +32,7 @@ public class PaymentApproveClient {
         this.paymentApproveUrl = paymentApproveUrl;
     }
 
-    public PaymentSuccessResponse approvePayment(String paymentKey, String orderId, int amount) {
-        final String authorizations = getAuthorizations();
+    public TossPaymentResponse approve(String paymentKey, String orderId, int amount) {
         final Map<String, Object> requestBody = Map.of(
                 "amount", amount,
                 "orderId", orderId,
@@ -41,11 +40,11 @@ public class PaymentApproveClient {
         );
 
         return restClient.post().uri(paymentApproveUrl)
-                .header("Authorization", authorizations)
+                .header("Authorization", getAuthorizations())
                 .accept(MediaType.APPLICATION_JSON)
                 .body(requestBody)
                 .retrieve()
-                .body(PaymentSuccessResponse.class);
+                .body(TossPaymentResponse.class);
     }
 
     private String getAuthorizations() {

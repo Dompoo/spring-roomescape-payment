@@ -1,14 +1,13 @@
 package roomescape.repository.impl;
 
-import java.time.LocalDate;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.reservationitem.ReservationItemRepository;
-import roomescape.domain.reservationitem.ReservationTheme;
-import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.repository.jpa.ReservationItemJpaRepository;
+
+import java.time.LocalDate;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -27,14 +26,22 @@ public class ReservationItemRepositoryImpl implements ReservationItemRepository 
     }
 
     @Override
-    public Optional<ReservationItem> findReservationItemByDateAndTimeAndTheme(LocalDate date,
-                                                                              ReservationTime time,
-                                                                              ReservationTheme theme) {
-        return reservationItemJpaRepository.findReservationItemByDateAndTimeAndTheme(date, time, theme);
+    public Optional<ReservationItem> findReservationItemByDateAndTimeIdAndThemeId(final LocalDate date, final Long timeId, final Long themeId) {
+        return reservationItemJpaRepository.findReservationItemByDateAndTime_IdAndTheme_Id(date, timeId, themeId);
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, ReservationTheme theme) {
-        return reservationItemJpaRepository.existsByDateAndTimeAndTheme(date, time, theme);
+    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        return reservationItemJpaRepository.existsByDateAndTime_IdAndTheme_Id(date, timeId, themeId);
+    }
+
+    @Override
+    public void deleteAllReservationItemByThemeId(long themeId) {
+        reservationItemJpaRepository.deleteAllByTheme_Id(themeId);
+    }
+
+    @Override
+    public void deleteAllReservationItemByTimeId(long timeId) {
+        reservationItemJpaRepository.deleteAllByTime_Id(timeId);
     }
 }

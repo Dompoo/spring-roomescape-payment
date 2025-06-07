@@ -9,7 +9,11 @@ public interface ReservationItemRepository {
 
     void delete(ReservationItem reservationItem);
 
-    Optional<ReservationItem> findReservationItemByDateAndTimeAndTheme(LocalDate date, ReservationTime time, ReservationTheme theme);
+    Optional<ReservationItem> findReservationItemByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, ReservationTheme theme);
+    boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long theme);
+
+    void deleteAllReservationItemByThemeId(long themeId);
+
+    void deleteAllReservationItemByTimeId(long timeId);
 }

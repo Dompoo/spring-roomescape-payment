@@ -1,12 +1,13 @@
 package roomescape.service.reservation;
 
-import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.payment.PaymentService;
+
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Service
@@ -31,7 +32,7 @@ public class ReservingService {
                 themeId,
                 timeId
         );
-        final ReservationResponse reservationResponse = reservationService.addReservation(createReservationRequest);
+        final ReservationResponse reservationResponse = reservationService.save(createReservationRequest);
         paymentService.approveAndSave(paymentKey, orderId, amount, reservationResponse.id());
         return reservationResponse;
     }

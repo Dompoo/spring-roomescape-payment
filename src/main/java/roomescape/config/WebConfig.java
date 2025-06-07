@@ -1,7 +1,6 @@
 package roomescape.config;
 
-import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -9,19 +8,17 @@ import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.global.AuthInterceptor;
 import roomescape.global.LoginMemberArgumentResolver;
+import roomescape.global.RequestLoggingInterceptor;
+
+import java.util.List;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
     private final AuthInterceptor authInterceptor;
+    private final RequestLoggingInterceptor requestLoggingInterceptor;
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
-
-    @Autowired
-    public WebConfig(final AuthInterceptor authInterceptor,
-                     final LoginMemberArgumentResolver loginMemberArgumentResolver) {
-        this.authInterceptor = authInterceptor;
-        this.loginMemberArgumentResolver = loginMemberArgumentResolver;
-    }
 
     @Override
     public void addArgumentResolvers(final List<HandlerMethodArgumentResolver> resolvers) {
@@ -32,6 +29,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addViewControllers(ViewControllerRegistry registry) {
         registry.addViewController("/reservation").setViewName("reservation");
         registry.addViewController("/reservation-mine").setViewName("reservation-mine");
+        registry.addViewController("/login").setViewName("login");
         registry.addViewController("/signup").setViewName("signup");
 
         registry.addViewController("/admin").setViewName("admin/index");
@@ -43,7 +41,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(authInterceptor)
-                .addPathPatterns("/admin/**");
+        registry.addInterceptor(authInterceptor).addPathPatterns("/api/admin/**");
+        registry.addInterceptor(requestLoggingInterceptor).addPathPatterns("/**").excludePathPatterns("/favicon.ico");
     }
 }
