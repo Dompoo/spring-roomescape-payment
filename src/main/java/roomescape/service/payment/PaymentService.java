@@ -1,7 +1,6 @@
 package roomescape.service.payment;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpServerErrorException;
@@ -12,6 +11,7 @@ import roomescape.domain.payment.PaymentRepository;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.global.exception.business.ExternalApiException;
+import roomescape.global.logging.util.Log;
 
 import java.util.NoSuchElementException;
 import java.util.UUID;
@@ -19,7 +19,6 @@ import java.util.UUID;
 import static roomescape.dto.response.TossPaymentResponse.PaymentStatus;
 import static roomescape.global.exception.business.BusinessErrorCode.*;
 
-@Slf4j
 @RequiredArgsConstructor
 @Service
 public class PaymentService {
@@ -40,25 +39,26 @@ public class PaymentService {
 
     private void approvePaymentSafely(String paymentKey, String orderId, int amount) {
         try {
-            log.info("토스 결제 승인 API 호출 - paymentKey : {}, orderId : {}, amount : {}", paymentKey, orderId, amount);
+            Log.business("결제 승인", "결제 승인 API 호출", "paymentKey : %s".formatted(paymentKey), getClass());
             paymentApproveClient.approve(paymentKey, orderId, amount);
+            Log.business("결제 승인", "결제 승인 API 호출 성공", "paymentKey : %s".formatted(paymentKey), getClass());
         } catch (RestClientException e) {
-            log.error("토스 결제 승인 API 실패", e);
+            Log.business("결제 승인", "결제 승인 API 호출 실패", "paymentKey : %s".formatted(paymentKey), getClass());
             // 결제 승인 요청 중 실패 -> 결제 승인 여부를 모르므로 결제 확인 요청
             int attempts = 0;
             while (attempts < 3) {
                 try {
                     attempts++;
-                    log.warn("토스 결제 확인 API 호출, {}번째 시도", attempts);
+                    Log.business("결제 승인", "복구하기 위해 결제 확인 API 호출", "attempt : %s, paymentKey : %s".formatted(attempts, paymentKey), getClass());
                     if (paymentCheckClient.checkStatus(paymentKey) == PaymentStatus.DONE) {
-                        log.info("토스 결제 승인 정상처리 확인");
+                        Log.business("결제 승인", "결제 확인 API로 복구 성공", "paymentKey : %s".formatted(paymentKey), getClass());
                         return;
                     }
                 } catch (HttpServerErrorException | ResourceAccessException ignored) {
                 }
             }
 
-            log.warn("토스 결제 확인 API 실패");
+            Log.business("결제 승인", "결제 확인 API로 복구 실패", "paymentKey : %s".formatted(paymentKey), getClass());
             // 결제 확인 요청도 실패 -> 안전하게 결제 취소 (멱등성 보장)
             // 토스 API 멱등성 관련 문서 : https://docs.tosspayments.com/reference#%EA%B2%B0%EC%A0%9C-%EC%B7%A8%EC%86%8C
             String idempotencyKey = UUID.randomUUID().toString();
@@ -67,23 +67,23 @@ public class PaymentService {
             while (attempts < 3) {
                 try {
                     attempts++;
-                    log.warn("토스 결제 취소 API 호출, {}번째 시도", attempts);
+                    Log.business("결제 승인", "복구하기 위해 결제 취소 API 호출", "attempt : %s, paymentKey : %s".formatted(attempts, paymentKey), getClass());
                     paymentCancelClient.cancelIdempotently(paymentKey, idempotencyKey);
                     cancelSuccess = true;
                 } catch (HttpServerErrorException | ResourceAccessException ignored) {
                 }
             }
             if (cancelSuccess) {
-                log.info("토스 결제 취소 성공");
+                Log.business("결제 승인", "결제 취소 API로 복구 성공", "paymentKey : %s".formatted(paymentKey), getClass());
                 throw new ExternalApiException(PAYMENT_CANCELED);
             } else {
-                log.warn("토스 결제 취소 실패, 취소 대기열에 추가 - paymentKey : {}, idempotencyKey : {}", paymentKey, idempotencyKey);
+                Log.business("결제 승인", "결제 취소 API로 복구 실패, 결제 취소 대기열에 추가", "paymentKey : %s, idempotencyKey : %s".formatted(paymentKey, idempotencyKey), getClass());
                 // 결제 취소 시도도 실패했다면, 일단 저장해놓고 추후에 취소 (5분 주기)
                 paymentCancelClient.addToCancelSchedule(paymentKey, idempotencyKey);
                 throw new ExternalApiException(PAYMENT_CANCEL_SCHEDULED);
             }
         } catch (Exception e) {
-            log.error("토스 결제 승인 시도 중 예상치 못한 예외 발생", e);
+            Log.business("결제 승인", "예상치 못한 예외 발생", "paymentKey : %s".formatted(paymentKey), getClass());
             // 예상하지 못한 예외 -> 관리자 문의
             // TODO : 개발자 수준에서 더 처리할 수 있는 것이 있다면 추가하기
             throw new ExternalApiException(PAYMENT_FAILED_UNKNOWN);

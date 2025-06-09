@@ -30,6 +30,15 @@ public class Log {
                 .write();
     }
 
+    public static void business(String event, String stage, String message, Class<?> location) {
+        new BizLogger(LogLevel.INFO, LogType.BUSINESS)
+                .add(LogData.EVENT, event)
+                .add(LogData.STAGE, stage)
+                .add(LogData.MESSAGE, message)
+                .add(LogData.LOCATION, location.getSimpleName())
+                .write();
+    }
+
     @Slf4j
     public static class BizLogger {
         private final LogLevel level;
