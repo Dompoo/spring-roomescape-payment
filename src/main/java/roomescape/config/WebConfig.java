@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.global.auth.argument_resolver.LoginInfoArgumentResolver;
 import roomescape.global.auth.interceptor.LoginInterceptor;
 import roomescape.global.auth.interceptor.RoleInterceptor;
-import roomescape.global.logging.RequestLoggingInterceptor;
+import roomescape.global.logging.httpLog.RequestLoggingInterceptor;
 
 import java.util.List;
 
