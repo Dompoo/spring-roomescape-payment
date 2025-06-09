@@ -7,6 +7,6 @@ public enum LogData {
     EVENT,
     STAGE,
     MESSAGE,
-    ERROR_MESSAGE,
-
+    EXCEPTION_NAME,
+    EXCEPTION_MESSAGE,
 }

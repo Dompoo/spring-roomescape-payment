@@ -3,9 +3,9 @@ package roomescape.global.logging.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static roomescape.global.logging.util.LogData.LEVEL;
@@ -23,15 +23,22 @@ public class Log {
         new BizLogger(LogLevel.INFO, LogType.HTTP_RESPONSE).add(LogData.MESSAGE, logData).write();
     }
 
+    public static void exception(Exception e) {
+        new BizLogger(LogLevel.WARN, LogType.EXCEPTION)
+                .add(LogData.EXCEPTION_NAME, e.getClass().getSimpleName())
+                .add(LogData.EXCEPTION_MESSAGE, e.getMessage())
+                .write();
+    }
+
     @Slf4j
     public static class BizLogger {
         private final LogLevel level;
-        private final LogType type;
-        private final Map<LogData, Object> additionalData = new HashMap<>();
+        private final Map<LogData, Object> additionalData = new LinkedTreeMap<>();
 
         public BizLogger(LogLevel level, LogType type) {
             this.level = level;
-            this.type = type;
+            additionalData.put(LOG_TYPE, type);
+            additionalData.put(LEVEL, level);
         }
 
         public BizLogger add(LogData dataType, Object value) {
@@ -50,8 +57,6 @@ public class Log {
 
         private String parseLogContentToJson() {
             try {
-                additionalData.put(LEVEL, level);
-                additionalData.put(LOG_TYPE, type);
                 return objectWriter.writeValueAsString(additionalData);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("로그를 JSON으로 파싱하는 중 오류가 발생하였습니다.", e);

@@ -1,7 +1,7 @@
 package roomescape.global.logging.util;
 
 public enum LogType {
-    ERROR,
+    EXCEPTION,
     HTTP_REQUEST,
     HTTP_RESPONSE,
 }
