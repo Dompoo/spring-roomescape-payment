@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    hibernate:
+      ddl-auto: create
+
+toss:
+  payments:
+    base-url: http://localhost:8080
+
+http-client:
+  connect-timeout-millis: 100
+  read-timeout-millis: 100

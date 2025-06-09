@@ -1,16 +1,10 @@
 spring:
-  h2:
-    console:
-      enabled: true
   datasource:
     url: jdbc:h2:mem:database
     username: sa
   jpa:
-    hibernate:
-      ddl-auto: create
-    defer-datasource-initialization: true
-  profiles:
-    active: local
+    open-in-view: false
+
 toss:
   payments:
     base-url: https://api.tosspayments.com
@@ -18,9 +12,11 @@ toss:
     payment-approve-url: /v1/payments/confirm
     payment-check-url: /v1/payments/{paymentKey}
     payment-cancel-url: /v1/payments/{paymentKey}/check
+
 http-client:
   connect-timeout-millis: 5000
   read-timeout-millis: 5000
+
 springdoc:
   default-consumes-media-type: application/json
   default-produces-media-type: application/json

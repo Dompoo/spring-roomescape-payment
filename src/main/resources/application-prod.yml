@@ -1,0 +1,7 @@
+spring:
+  config:
+    activate:
+      on-profile: deploy
+  jpa:
+    hibernate:
+      ddl-auto: validate

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.payment.Payment;
@@ -20,6 +21,7 @@ import java.util.List;
 
 @SpringBootTest
 @Import({DataCleaner.class, DataInserter.class})
+@ActiveProfiles("test")
 public abstract class ServiceTest {
 
     @Autowired

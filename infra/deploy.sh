@@ -30,5 +30,5 @@ if [ -n "$PID" ]; then
   fi
 fi
 
-nohup java -jar "$(find build/libs -name "*.jar" | grep -v plain | head -1)" > app.log 2>&1 &
+nohup java -jar "$(find build/libs -name "*.jar" | grep -v plain | head -1)" --spring.profiles.active=prod > app.log 2>&1 &
 echo "애플리케이션 시작 완료";

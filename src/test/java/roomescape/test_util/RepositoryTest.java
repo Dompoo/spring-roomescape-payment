@@ -4,6 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.payment.Payment;
@@ -12,12 +13,7 @@ import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.reservationitem.ReservationTheme;
 import roomescape.domain.reservationitem.ReservationTime;
-import roomescape.repository.impl.MemberRepositoryImpl;
-import roomescape.repository.impl.PaymentRepositoryImpl;
-import roomescape.repository.impl.ReservationItemRepositoryImpl;
-import roomescape.repository.impl.ReservationRepositoryImpl;
-import roomescape.repository.impl.ReservationThemeRepositoryImpl;
-import roomescape.repository.impl.ReservationTimeRepositoryImpl;
+import roomescape.repository.impl.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -31,6 +27,7 @@ import java.time.LocalTime;
         ReservationThemeRepositoryImpl.class,
         ReservationTimeRepositoryImpl.class,
 })
+@ActiveProfiles("test")
 public abstract class RepositoryTest {
 
     @Autowired

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClientException;
 import org.wiremock.spring.EnableWireMock;
@@ -22,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @TestPropertySource(properties = {
         "toss.payments.base-url=http://localhost:${wiremock.server.port}"
 })
+@ActiveProfiles("test")
 class PaymentApproveClientTest {
 
     @Autowired
@@ -91,7 +93,7 @@ class PaymentApproveClientTest {
                 1000
         ))
                 .isInstanceOf(ExternalApiException.class)
-                .hasMessageContaining("결제 승인 중 예외가 발생하였습니다.");
+                .hasMessageContaining("결제 승인 중 문제가 발생하여 결제를 취소했습니다.");
     }
 
     @Test
