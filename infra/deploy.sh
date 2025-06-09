@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BRANCH_NAME="step2"
+BRANCH_NAME="dompoo"
 REMOTE_NAME="origin"
 PORT_NUMBER=8080
 set -e
