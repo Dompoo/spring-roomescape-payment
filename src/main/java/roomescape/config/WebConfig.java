@@ -9,7 +9,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.global.auth.argument_resolver.LoginInfoArgumentResolver;
 import roomescape.global.auth.interceptor.LoginInterceptor;
 import roomescape.global.auth.interceptor.RoleInterceptor;
-import roomescape.global.logging.httpLog.RequestLoggingInterceptor;
+import roomescape.global.logging.httpLog.HttpLoggingInterceptor;
 
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final RoleInterceptor roleInterceptor;
     private final LoginInterceptor loginInterceptor;
-    private final RequestLoggingInterceptor requestLoggingInterceptor;
+    private final HttpLoggingInterceptor httpLoggingInterceptor;
     private final LoginInfoArgumentResolver loginInfoArgumentResolver;
 
     @Override
@@ -33,7 +33,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/reservation-mine").setViewName("reservation-mine");
         registry.addViewController("/login").setViewName("login");
         registry.addViewController("/signup").setViewName("signup");
-
         registry.addViewController("/admin").setViewName("admin/index");
         registry.addViewController("/admin/reservation").setViewName("admin/reservation-new");
         registry.addViewController("/admin/time").setViewName("admin/time");
@@ -45,6 +44,17 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(loginInterceptor).addPathPatterns("/**");
         registry.addInterceptor(roleInterceptor).addPathPatterns("/**");
-        registry.addInterceptor(requestLoggingInterceptor).addPathPatterns("/**").excludePathPatterns("/favicon.ico");
+        registry.addInterceptor(httpLoggingInterceptor).addPathPatterns("/**").excludePathPatterns(
+                "/",
+                "/reservation",
+                "/reservation-mine",
+                "/login",
+                "/signup",
+                "/admin",
+                "/admin/reservation",
+                "/admin/time",
+                "/admin/theme",
+                "/admin/waiting"
+        );
     }
 }

@@ -1,7 +1,15 @@
 package roomescape.global.logging.util;
 
 public enum LogData {
-    LEVEL,
+    REQUEST_ID,
+
+    METHOD,
+    URI,
+    HEADERS,
+    BODY,
+    REQUEST_URI,
+    STATUS,
+
     LOG_TYPE,
     LOCATION,
     EVENT,

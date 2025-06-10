@@ -1,0 +1,32 @@
+{
+  "timestamp": {
+    "$resolver": "timestamp",
+    "pattern": {
+      "format": "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+      "timeZone": "UTC"
+    }
+  },
+  "level": {
+    "$resolver": "level",
+    "field": "name"
+  },
+  "logger": {
+    "$resolver": "logger",
+    "field": "name"
+  },
+  "message": {
+    "$resolver": "message",
+    "stringified": true
+  },
+  "exceptionClass": {
+    "$resolver": "exception",
+    "field": "className"
+  },
+  "stackTrace": {
+    "$resolver": "exception",
+    "field": "stackTrace"
+  },
+  "mdc": {
+    "$resolver": "mdc"
+  }
+}

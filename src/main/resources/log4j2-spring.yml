@@ -7,10 +7,26 @@ Configuration:
       name: Console
       target: SYSTEM_OUT
       PatternLayout:
-        pattern: "%highlight{[%d{yyyy-MM-dd HH:mm:ss.SSS}]}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=cyan} %highlight{%-5p}%m%n"
+        pattern: "%highlight{[%d{yyyy-MM-dd HH:mm:ss.SSS}]}{FATAL=bg_red, ERROR=red, WARN=yellow, INFO=green, DEBUG=blue, TRACE=cyan} %highlight{%-5p}%m%X%n"
+    RollingFile:
+      name: JsonRollingFile
+      fileName: logs/app.log
+      filePattern: logs/app-%d{yyyy-MM-dd}.log.gz
+      JsonTemplateLayout:
+        eventTemplateUri: classpath:jsonTemplate.json
+      Policies:
+        TimeBasedTriggeringPolicy:
+          interval: 1
+          modulate: true
 
   Loggers:
     Root:
       level: info
+      AppenderRef:
+        - ref: JsonRollingFile
+    Logger:
+      name: debug-console
+      level: debug
+      additivity: false
       AppenderRef:
         - ref: Console
